@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import styled from '@emotion/styled'
 import Formulario from './components/Formulario'
+import Resultado from './components/Resultado'
+import Spinner from './components/Spinner'
 import ImagenCripto from './img/imagen-criptos.png'
 
 const Contenedor = styled.div`
@@ -42,6 +44,35 @@ const Heading = styled.h1`
 `
 
 function App() {
+
+  const [ monedas, setMonedas ] = useState({})
+  const [ resultado, setResultado ] = useState({})
+  const [ cargando, setCargando ] = useState(false) // spiner cuando se carga la info de la cotizacion
+
+  useEffect(() => {
+    if(Object.keys(monedas).length > 0) {
+
+      const cotizarCripto = async () => {
+        setCargando(true)
+        setResultado({})
+
+        const { moneda, criptomoneda } = monedas
+        const url = `https://min-api.cryptocompare.com/data/pricemultifull?fsyms=${criptomoneda}&tsyms=${moneda}`
+
+        //console.log(url)
+
+        const respuesta = await fetch(url)
+        const resultado = await respuesta.json()
+
+        //console.log(resultado.DISPLAY[criptomoneda][moneda])
+        setResultado(resultado.DISPLAY[criptomoneda][moneda])
+
+        setCargando(false)
+      }
+      cotizarCripto()
+    }
+  }, [monedas])
+
   return (
     <Contenedor>
       <Imagen 
@@ -51,7 +82,12 @@ function App() {
       <div>
         <Heading>Cotiza Criptomonedas al Instante</Heading>
 
-        <Formulario />
+        <Formulario 
+          setMonedas={ setMonedas }
+        />
+        {cargando && <Spinner /> }
+        {/* para mostrar Resultado solo cuando exista el resultado, veo dentro del objeto alguna propiedad y verifico q exista (Price) */}
+        {resultado.PRICE && <Resultado resultado={ resultado } />}
       </div>
     </Contenedor>
   )

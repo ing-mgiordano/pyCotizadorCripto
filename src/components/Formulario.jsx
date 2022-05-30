@@ -1,10 +1,11 @@
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import styled from '@emotion/styled'
+import Error from './Error'
 import useSelectMonedas from '../hooks/useSelectMonedas'
 import { monedas } from '../data/monedas'
 
 const InputSubmit = styled.input`
-    background-color: #9497FF;
+    background-color: #515153;
     border: none;
     width: 100%;
     padding: 10px;
@@ -22,33 +23,70 @@ const InputSubmit = styled.input`
     }
 `
 
-const Formulario = () => {
+const Formulario = ({ setMonedas }) => {
+    const [ criptos, setCriptos ] = useState([])
+    const [ error, setError ] = useState(false)
 
     const [ moneda, SelectMonedas ] = useSelectMonedas('Elije tu Moneda', monedas)
+    const [ criptomoneda, SelectCriptomonedas ] = useSelectMonedas('Elije tu Cripto', criptos)
     
     useEffect(() => {
         const consultarAPI = async () => {
             const url = 'https://min-api.cryptocompare.com/data/top/mktcapfull?limit=20&tsym=USD'
             const respuesta = await fetch(url)
             const resultado = await respuesta.json()
-            console.log(resultado.Data)
+            //console.log(resultado)
+
+            const arrayCriptos = resultado.Data.map(cripto => {
+                const objeto = {
+                    id: cripto.CoinInfo.Name,
+                    nombre: cripto.CoinInfo.FullName
+                }
+                //console.log(objeto)
+                return objeto
+            })
+            //console.log(arrayCriptos)
+
+            setCriptos(arrayCriptos)
         }
         consultarAPI()
     }, [])
 
+    const handleSubmit = e => {
+        e.preventDefault()
+        
+        if([moneda, criptomoneda].includes('')) {
+            setError(true)
+            return
+        }
+
+        setError(false)
+        setMonedas({
+            moneda,
+            criptomoneda
+        })
+    }
+
     return (
-        <form>
-            
-            <SelectMonedas />
-            
+        <>
+            {error && <Error>Todos los campos son obligatorios</Error>}
             
 
-            <InputSubmit 
-                type='submit' 
-                value='Cotizar' 
-            />
-        </form>
+            <form
+                onSubmit={handleSubmit}    
+            >
+                
+                <SelectMonedas />
+                <SelectCriptomonedas />
+        
+                <InputSubmit 
+                    type='submit' 
+                    value='Cotizar' 
+                />
+            </form>
+        </>
     )
 }
 
 export default Formulario
+

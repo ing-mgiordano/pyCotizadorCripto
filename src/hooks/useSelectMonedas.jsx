@@ -12,7 +12,8 @@ const Label = styled.label`
 
 const Select = styled.select`
     width: 100%;
-    color : #0d088d;
+    color : #2b2dbd;
+    background-color: #c6c6d1;
     display: block;
     font-family: 'Lato', sans-serif;
     font-size: 18px;
@@ -22,7 +23,7 @@ const Select = styled.select`
 
 const useSelectMonedas = (label, opciones) => {
 
-    const [state, setState] = useState('')
+    const [ state, setState ] = useState('')
     
     const SelectMonedas = () => (
         <>
@@ -31,7 +32,7 @@ const useSelectMonedas = (label, opciones) => {
                 value={state}
                 onChange={e => setState(e.target.value)}
             >
-                <option value="">Seleccione</option>
+                <option value=''>-- Seleccione --</option>
 
                 {opciones.map( opcion => (
                     <option
